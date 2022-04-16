@@ -11,7 +11,7 @@ var velocity = Vector3.ZERO
 var camNode = null
 
 func _ready():
-	camNode = get_node("ThirdPersonCamera")
+	camNode = $ThirdPersonCamera
 
 func _physics_process(delta):
 	var direction = Vector3.ZERO
@@ -37,31 +37,43 @@ func _physics_process(delta):
 		
 	if direction != Vector3.ZERO:
 		direction = direction.normalized()
-
-	velocity.x = direction.x * speed
-	velocity.z = direction.z * speed
+	if is_nothing_pressed():
+		velocity.x = lerp(velocity.x, 0, 0.05)
+		velocity.z = lerp(velocity.z, 0, 0.05)
+	else:
+		velocity.x = direction.x * speed
+		velocity.z = direction.z * speed
 	
 	if is_on_floor() and Input.is_action_just_pressed("ui_select"):
 		velocity.y = jump_impulse
 	
 	velocity.y -= fall_acceleration * delta
+
 	velocity = move_and_slide(velocity, Vector3.UP)
 
+func is_nothing_pressed():
+	return (not Input.is_action_pressed("ui_up") and not Input.is_action_pressed("ui_left") 
+	and not Input.is_action_pressed("ui_right") and not Input.is_action_pressed("ui_down"))
+
 func is_forward_pressed():
-	return Input.is_action_pressed("ui_up") or Input.is_key_pressed(KEY_W)
+	return Input.is_action_pressed("ui_up")
 	
 func is_left_pressed():
-	return Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A)
+	return Input.is_action_pressed("ui_left")
 	
 func is_right_pressed():
-	return Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D)
+	return Input.is_action_pressed("ui_right")
 	
 func is_back_pressed():
-	return Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S)
+	return Input.is_action_pressed("ui_down")
 	
 func rotate2DRelativeTo(vector, number):
 	var new_vec = Vector3.ZERO
 	new_vec.x = vector.rotated(deg2rad(number)).x
 	new_vec.z = vector.rotated(deg2rad(number)).y
-	new_vec.y = vector.y
+	new_vec.y = 0
+	
+	var un_vec = new_vec.normalized()
+	
+	$MeshInstance.rotate(Vector3(un_vec.z, un_vec.y, -un_vec.x), deg2rad(8))
 	return new_vec
