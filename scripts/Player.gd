@@ -11,7 +11,7 @@ var velocity = Vector3.ZERO
 var camNode = null
 
 func _ready():
-	camNode = $ThirdPersonCamera
+	camNode = $CamPosition
 
 func _physics_process(delta):
 	var direction = Vector3.ZERO
